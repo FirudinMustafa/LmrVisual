@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" fill="none">
+  <!-- Camera body -->
+  <rect x="8" y="28" width="38" height="30" rx="5" stroke="white" stroke-width="2.5" fill="none"/>
+  <!-- Camera lens -->
+  <circle cx="27" cy="43" r="9" stroke="white" stroke-width="2.2" fill="none"/>
+  <circle cx="27" cy="43" r="4.5" stroke="white" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <!-- Camera top bump -->
+  <path d="M18 28 L22 21 L32 21 L36 28" stroke="white" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
+  <!-- Decorative swoosh -->
+  <path d="M42 25 Q60 12 90 18 Q110 22 130 16" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- LMRVISUAL text -->
+  <text x="52" y="46" font-family="Montserrat, Arial, sans-serif" font-size="22" font-weight="700" fill="white" letter-spacing="1.5">LMRVISUAL</text>
+  <!-- Photography text -->
+  <text x="90" y="64" font-family="Playfair Display, Georgia, serif" font-size="16" font-style="italic" fill="white" opacity="0.85" letter-spacing="0.5">Photography</text>
+</svg>

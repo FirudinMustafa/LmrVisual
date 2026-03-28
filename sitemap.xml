@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemans.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    <url>
+        <loc>https://lmrvisual.com/</loc>
+        <lastmod>2026-03-28</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://lmrvisual.com/images/portfolio/ortakoy-couple-photoshoot.webp</image:loc>
+            <image:title>Couple Photoshoot at Ortakoy Mosque Istanbul</image:title>
+        </image:image>
+        <image:image>
+            <image:loc>https://lmrvisual.com/images/portfolio/galata-tower-couple.webp</image:loc>
+            <image:title>Couple Photoshoot at Galata Tower Istanbul</image:title>
+        </image:image>
+        <image:image>
+            <image:loc>https://lmrvisual.com/images/portfolio/istanbul-flying-dress.webp</image:loc>
+            <image:title>Flying Dress Photoshoot Istanbul</image:title>
+        </image:image>
+        <image:image>
+            <image:loc>https://lmrvisual.com/images/portfolio/rooftop-photoshoot.webp</image:loc>
+            <image:title>Rooftop Photoshoot Istanbul Bosphorus View</image:title>
+        </image:image>
+        <image:image>
+            <image:loc>https://lmrvisual.com/images/portfolio/istanbul-wedding.webp</image:loc>
+            <image:title>Wedding Photoshoot Istanbul</image:title>
+        </image:image>
+    </url>
+</urlset>
