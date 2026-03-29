@@ -648,6 +648,35 @@ h1, h2, h3, h4 {
     transition: var(--transition);
     display: flex;
     flex-direction: column;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+.pricing-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        rgba(10,10,10,0.25) 0%,
+        rgba(10,10,10,0.55) 30%,
+        rgba(10,10,10,0.82) 60%,
+        rgba(10,10,10,0.95) 100%);
+    z-index: 0;
+    transition: var(--transition);
+}
+
+.pricing-card:hover::before {
+    background: linear-gradient(180deg,
+        rgba(10,10,10,0.15) 0%,
+        rgba(10,10,10,0.45) 30%,
+        rgba(10,10,10,0.78) 60%,
+        rgba(10,10,10,0.93) 100%);
+}
+
+.pricing-card > * {
+    position: relative;
+    z-index: 1;
 }
 
 .pricing-card:hover {
@@ -658,17 +687,24 @@ h1, h2, h3, h4 {
 
 .pricing-card.featured {
     border-color: var(--color-primary);
-    background: linear-gradient(180deg, rgba(200, 164, 92, 0.08) 0%, var(--color-gray-900) 100%);
+}
+
+.pricing-card.featured::before {
+    background: linear-gradient(180deg,
+        rgba(200, 164, 92, 0.10) 0%,
+        rgba(10,10,10,0.50) 30%,
+        rgba(10,10,10,0.82) 60%,
+        rgba(10,10,10,0.95) 100%);
 }
 
 .pricing-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    margin: 0 auto 12px;
     background: var(--color-primary);
     color: var(--color-dark);
-    padding: 4px 18px;
+    padding: 5px 18px;
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -851,10 +887,10 @@ h1, h2, h3, h4 {
 
 .portfolio-carousel .carousel-slide {
     position: relative;
-    width: 25%;
+    width: 33.333%;
     height: auto;
     flex-shrink: 0;
-    padding: 0 6px;
+    padding: 0 8px;
 }
 
 .portfolio-carousel .portfolio-img {
@@ -868,15 +904,19 @@ h1, h2, h3, h4 {
 /* Pricing carousel */
 .pricing-carousel {
     --carousel-card-w: 270px;
-    --carousel-card-h: 460px;
+    --carousel-card-h: 520px;
     --carousel-radius: 280px;
 }
 
 .pricing-carousel .carousel-scene {
     perspective: 4000px;
+    overflow: visible;
+    padding: 40px 0;
+    min-height: calc(var(--carousel-card-h) + 100px);
+}
+
+.pricing-carousel {
     overflow: hidden;
-    padding: 30px 0;
-    min-height: calc(var(--carousel-card-h) + 80px);
 }
 
 .pricing-carousel .carousel-slide .pricing-card {
@@ -1034,6 +1074,131 @@ html[dir="rtl"] .carousel-btn-next svg { transform: rotate(180deg); }
 .review-author span {
     font-size: 0.8rem;
     color: var(--color-gray-400);
+}
+
+/* ===== User Review Form ===== */
+.user-reviews-section {
+    margin-top: 48px;
+}
+
+.user-reviews-grid {
+    margin-bottom: 32px;
+}
+
+.user-reviews-grid:empty {
+    display: none;
+    margin-bottom: 0;
+}
+
+.review-form-wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.review-form-wrapper h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.review-form-desc {
+    font-size: 0.9rem;
+    color: var(--color-gray-300);
+    margin-bottom: 24px;
+}
+
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.review-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.review-form input,
+.review-form textarea {
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--color-gray-800);
+    border: 1px solid var(--color-gray-700);
+    border-radius: var(--radius-md);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    outline: none;
+}
+
+.review-form input:focus,
+.review-form textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(200, 164, 92, 0.1);
+}
+
+.review-form input::placeholder,
+.review-form textarea::placeholder {
+    color: var(--color-gray-400);
+}
+
+.review-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.review-form-stars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--color-gray-300);
+}
+
+.star-input {
+    display: flex;
+    gap: 4px;
+}
+
+.star-input button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.6rem;
+    color: var(--color-gray-700);
+    transition: color 0.2s;
+    padding: 0 2px;
+}
+
+.star-input button.active,
+.star-input button:hover {
+    color: #f5b731;
+}
+
+.review-form .btn {
+    align-self: center;
+    min-width: 200px;
+}
+
+.review-card.user-review {
+    border-color: rgba(200, 164, 92, 0.15);
+}
+
+.review-card .review-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    background: rgba(200, 164, 92, 0.15);
+    color: var(--color-primary);
+    padding: 2px 10px;
+    border-radius: 50px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* ===== FAQ ===== */
@@ -1476,12 +1641,12 @@ html[dir="rtl"] .lang-option {
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
     .portfolio-carousel .carousel-slide {
-        width: 33.333%;
+        width: 50%;
     }
 
     .pricing-carousel {
         --carousel-card-w: 250px;
-        --carousel-card-h: 440px;
+        --carousel-card-h: 500px;
         --carousel-radius: 260px;
     }
 
@@ -1598,6 +1763,7 @@ html[dir="rtl"] .lang-option {
     /* Portfolio slider */
     .portfolio-carousel .carousel-slide {
         width: 50%;
+        padding: 0 6px;
     }
 
     /* Show overlay always on touch devices */
@@ -1685,7 +1851,7 @@ html[dir="rtl"] .lang-option {
     /* Pricing carousel */
     .pricing-carousel {
         --carousel-card-w: 240px;
-        --carousel-card-h: 420px;
+        --carousel-card-h: 480px;
         --carousel-radius: 240px;
     }
 
@@ -1743,6 +1909,10 @@ html[dir="rtl"] .lang-option {
 
     .review-card {
         padding: 24px 20px;
+    }
+
+    .review-form-row {
+        grid-template-columns: 1fr;
     }
 
     .review-text {
@@ -1894,7 +2064,7 @@ html[dir="rtl"] .lang-option {
 
     /* Portfolio slider mobile */
     .portfolio-carousel .carousel-slide {
-        width: 50%;
+        width: 100%;
         padding: 0 4px;
     }
 
@@ -1937,7 +2107,7 @@ html[dir="rtl"] .lang-option {
     /* Pricing carousel mobile */
     .pricing-carousel {
         --carousel-card-w: 230px;
-        --carousel-card-h: 400px;
+        --carousel-card-h: 460px;
         --carousel-radius: 220px;
     }
 

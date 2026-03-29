@@ -17,6 +17,12 @@ function setLanguage(lang) {
         if (t[key]) el.innerHTML = t[key];
     });
 
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (t[key]) el.placeholder = t[key];
+    });
+
     // Update HTML attributes
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -107,9 +113,9 @@ function createSlider(containerSelector, options) {
 
     function getSlidesPerView() {
         var w = window.innerWidth;
-        if (w > 1200) return 4;
-        if (w > 1024) return 3;
-        return 2;
+        if (w > 1200) return 3;
+        if (w > 768) return 2;
+        return 1;
     }
 
     function maxIndex() {
@@ -524,7 +530,7 @@ filterBtns.forEach(function(btn) {
 
 // ===== Pricing 3D Carousel =====
 var pricingCarousel = create3DCarousel('.pricing-carousel', {
-    autoSpeed: 0.05
+    autoSpeed: 0.08
 });
 
 // ===== Scroll Reveal Animation =====
@@ -597,6 +603,93 @@ function closeLightbox() {
 lightboxClose.addEventListener('click', (e) => { e.stopPropagation(); closeLightbox(); });
 lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+// ===== User Reviews =====
+(function() {
+    var form = document.getElementById('reviewForm');
+    var container = document.getElementById('userReviews');
+    var starInput = document.getElementById('starInput');
+    if (!form || !container) return;
+
+    var selectedRating = 5;
+
+    // Star selection
+    if (starInput) {
+        var starBtns = starInput.querySelectorAll('button');
+        function updateStars(rating) {
+            starBtns.forEach(function(btn) {
+                btn.classList.toggle('active', parseInt(btn.dataset.star) <= rating);
+            });
+        }
+        updateStars(5);
+        starBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.star);
+                updateStars(selectedRating);
+            });
+            btn.addEventListener('mouseenter', function() {
+                updateStars(parseInt(this.dataset.star));
+            });
+            btn.addEventListener('mouseleave', function() {
+                updateStars(selectedRating);
+            });
+        });
+    }
+
+    function getReviews() {
+        try { return JSON.parse(localStorage.getItem('lmr-user-reviews') || '[]'); }
+        catch(e) { return []; }
+    }
+
+    function saveReviews(reviews) {
+        localStorage.setItem('lmr-user-reviews', JSON.stringify(reviews));
+    }
+
+    function renderReviews() {
+        var reviews = getReviews();
+        if (reviews.length === 0) { container.innerHTML = ''; return; }
+        container.innerHTML = reviews.map(function(r, idx) {
+            var initials = r.name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+            var stars = '';
+            for (var i = 0; i < r.rating; i++) stars += '&#9733;';
+            return '<div class="review-card user-review">' +
+                '<span class="review-badge">Client Review</span>' +
+                '<div class="review-stars">' + stars + '</div>' +
+                '<p class="review-text">' + escapeHtml(r.text) + '</p>' +
+                '<div class="review-author">' +
+                    '<div class="review-avatar">' + initials + '</div>' +
+                    '<div><strong>' + escapeHtml(r.name) + '</strong><span>' + escapeHtml(r.location) + '</span></div>' +
+                '</div></div>';
+        }).join('');
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var name = document.getElementById('reviewName').value.trim();
+        var location = document.getElementById('reviewLocation').value.trim();
+        var text = document.getElementById('reviewText').value.trim();
+        if (!name || !location || !text) return;
+
+        var reviews = getReviews();
+        reviews.unshift({ name: name, location: location, text: text, rating: selectedRating, date: new Date().toISOString() });
+        saveReviews(reviews);
+        renderReviews();
+        form.reset();
+        selectedRating = 5;
+        if (starInput) {
+            var starBtns = starInput.querySelectorAll('button');
+            starBtns.forEach(function(btn) { btn.classList.toggle('active', parseInt(btn.dataset.star) <= 5); });
+        }
+    });
+
+    renderReviews();
+})();
 
 // ===== Smooth Scroll =====
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
