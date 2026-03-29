@@ -407,6 +407,31 @@
                 });
             }
         }
+        // Load uploaded portfolio photos from IndexedDB
+        var dbReq = indexedDB.open('lmr-portfolio', 1);
+        dbReq.onupgradeneeded = function(e) {
+            var d = e.target.result;
+            if (!d.objectStoreNames.contains('photos')) d.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+        };
+        dbReq.onsuccess = function(e) {
+            var d = e.target.result;
+            var tx = d.transaction('photos', 'readonly');
+            var store = tx.objectStore('photos');
+            var req = store.getAll();
+            req.onsuccess = function() {
+                var photos = req.result || [];
+                if (photos.length === 0) return;
+                var track = document.querySelector('.portfolio-carousel .carousel-track');
+                if (!track) return;
+                photos.forEach(function(p) {
+                    var article = document.createElement('article');
+                    article.className = 'carousel-slide portfolio-item';
+                    article.dataset.category = p.category;
+                    article.innerHTML = '<div class="portfolio-img"><img src="' + p.data + '" alt="' + p.title + '" width="600" height="800" loading="lazy"><div class="portfolio-overlay"><h3>' + p.title + '</h3><p>' + p.location + '</p></div></div>';
+                    track.appendChild(article);
+                });
+            };
+        };
     })();
     </script>
     <script src="js/i18n.js"></script>

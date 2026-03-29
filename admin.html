@@ -233,6 +233,71 @@
         }
         .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
 
+        /* Upload area */
+        .upload-area {
+            border: 2px dashed var(--gray-700);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--gold);
+            background: rgba(200,164,92,0.05);
+        }
+        .uploaded-card {
+            background: var(--gray-800);
+            border: 1px solid var(--gray-700);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .uploaded-card img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            display: block;
+        }
+        .uploaded-card-info {
+            padding: 10px 12px;
+        }
+        .uploaded-card-info strong {
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .uploaded-card-info span {
+            font-size: 0.7rem;
+            color: var(--gray-400);
+        }
+        .uploaded-card .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(231,76,60,0.9);
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .uploaded-card:hover .delete-btn { opacity: 1; }
+        .preview-thumb {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
         /* Form elements */
         .form-group { margin-bottom: 16px; }
         .form-group label {
@@ -406,7 +471,52 @@
             <!-- Portfolio Panel -->
             <div class="panel" id="panel-portfolio">
                 <div class="main-header"><h2>Portfolio Management</h2></div>
-                <p style="font-size:0.85rem;color:var(--gray-400);margin-bottom:20px;">Portfolio images are stored in the /images/portfolio/ folder. To add new images, upload them to that folder and update index.html.</p>
+
+                <!-- Upload Form -->
+                <div class="pricing-edit-card" style="margin-bottom:24px;">
+                    <h4>Upload New Photo</h4>
+                    <div class="upload-area" id="uploadArea">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--gray-400);margin-bottom:12px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p style="color:var(--gray-300);font-size:0.9rem;margin-bottom:4px;">Drag & drop or click to upload</p>
+                        <p style="color:var(--gray-400);font-size:0.75rem;">JPG, PNG, WebP - Max 5MB</p>
+                        <input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" style="display:none" multiple>
+                    </div>
+                    <div id="uploadPreview" style="display:none;margin-top:16px;">
+                        <div id="previewGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-bottom:16px;"></div>
+                    </div>
+                    <div class="form-row" style="margin-top:16px;">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="photoTitle" placeholder="e.g. Couple Photoshoot">
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="photoLocation" placeholder="e.g. Galata Tower">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="photoCategory">
+                            <option value="couple">Couple</option>
+                            <option value="solo">Solo</option>
+                            <option value="wedding">Wedding</option>
+                            <option value="rooftop">Rooftop</option>
+                            <option value="proposal">Proposal</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-gold btn-sm" id="uploadBtn" disabled>Upload to Portfolio</button>
+                    </div>
+                </div>
+
+                <!-- Uploaded Photos -->
+                <div id="uploadedSection" style="display:none;margin-bottom:24px;">
+                    <h3 style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--gray-700);">Uploaded Photos</h3>
+                    <div id="uploadedGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;"></div>
+                </div>
+
+                <!-- Default Photos -->
+                <h3 style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--gray-700);">Default Photos</h3>
                 <table class="admin-table">
                     <thead><tr><th>Image</th><th>Title</th><th>Category</th><th>Location</th></tr></thead>
                     <tbody id="portfolioTable"></tbody>
@@ -692,7 +802,159 @@
             showToast('Review deleted');
         };
 
-        // ===== Portfolio =====
+        // ===== IndexedDB for Images =====
+        var db = null;
+        function openDB(callback) {
+            if (db) { callback(db); return; }
+            var req = indexedDB.open('lmr-portfolio', 1);
+            req.onupgradeneeded = function(e) {
+                var d = e.target.result;
+                if (!d.objectStoreNames.contains('photos')) {
+                    d.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+                }
+            };
+            req.onsuccess = function(e) { db = e.target.result; callback(db); };
+            req.onerror = function() { console.error('IndexedDB error'); };
+        }
+
+        function getAllPhotos(callback) {
+            openDB(function(db) {
+                var tx = db.transaction('photos', 'readonly');
+                var store = tx.objectStore('photos');
+                var req = store.getAll();
+                req.onsuccess = function() { callback(req.result || []); };
+            });
+        }
+
+        function addPhoto(photo, callback) {
+            openDB(function(db) {
+                var tx = db.transaction('photos', 'readwrite');
+                var store = tx.objectStore('photos');
+                store.add(photo);
+                tx.oncomplete = function() { callback(); };
+            });
+        }
+
+        function deletePhoto(id, callback) {
+            openDB(function(db) {
+                var tx = db.transaction('photos', 'readwrite');
+                var store = tx.objectStore('photos');
+                store.delete(id);
+                tx.oncomplete = function() { callback(); };
+            });
+        }
+
+        // ===== Portfolio Upload =====
+        var uploadArea = document.getElementById('uploadArea');
+        var photoFile = document.getElementById('photoFile');
+        var uploadPreview = document.getElementById('uploadPreview');
+        var previewGrid = document.getElementById('previewGrid');
+        var uploadBtn = document.getElementById('uploadBtn');
+        var pendingFiles = [];
+
+        if (uploadArea) {
+            uploadArea.addEventListener('click', function() { photoFile.click(); });
+            uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); uploadArea.classList.add('dragover'); });
+            uploadArea.addEventListener('dragleave', function() { uploadArea.classList.remove('dragover'); });
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+            photoFile.addEventListener('change', function() { handleFiles(this.files); });
+        }
+
+        function handleFiles(files) {
+            pendingFiles = [];
+            previewGrid.innerHTML = '';
+            for (var i = 0; i < files.length; i++) {
+                if (files[i].size > 5 * 1024 * 1024) { showToast('File too large: ' + files[i].name); continue; }
+                if (!files[i].type.match(/image\/(jpeg|png|webp)/)) { showToast('Invalid format: ' + files[i].name); continue; }
+                pendingFiles.push(files[i]);
+            }
+            if (pendingFiles.length > 0) {
+                uploadPreview.style.display = 'block';
+                uploadBtn.disabled = false;
+                pendingFiles.forEach(function(file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-thumb';
+                        previewGrid.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        if (uploadBtn) {
+            uploadBtn.addEventListener('click', function() {
+                var title = document.getElementById('photoTitle').value.trim();
+                var location = document.getElementById('photoLocation').value.trim();
+                var category = document.getElementById('photoCategory').value;
+                if (!title || !location) { showToast('Please fill title and location'); return; }
+                if (pendingFiles.length === 0) { showToast('No files selected'); return; }
+
+                var uploaded = 0;
+                pendingFiles.forEach(function(file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        addPhoto({
+                            title: title,
+                            location: location,
+                            category: category,
+                            data: e.target.result,
+                            date: new Date().toISOString()
+                        }, function() {
+                            uploaded++;
+                            if (uploaded === pendingFiles.length) {
+                                showToast(uploaded + ' photo(s) uploaded!');
+                                pendingFiles = [];
+                                previewGrid.innerHTML = '';
+                                uploadPreview.style.display = 'none';
+                                uploadBtn.disabled = true;
+                                photoFile.value = '';
+                                document.getElementById('photoTitle').value = '';
+                                document.getElementById('photoLocation').value = '';
+                                loadUploadedPhotos();
+                                updateStats();
+                            }
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+
+        function loadUploadedPhotos() {
+            getAllPhotos(function(photos) {
+                var section = document.getElementById('uploadedSection');
+                var grid = document.getElementById('uploadedGrid');
+                if (photos.length === 0) { section.style.display = 'none'; return; }
+                section.style.display = 'block';
+                grid.innerHTML = photos.map(function(p) {
+                    return '<div class="uploaded-card">' +
+                        '<button class="delete-btn" onclick="removePhoto(' + p.id + ')">&times;</button>' +
+                        '<img src="' + p.data + '" alt="' + escapeAttr(p.title) + '">' +
+                        '<div class="uploaded-card-info">' +
+                            '<strong>' + escapeHtml(p.title) + '</strong>' +
+                            '<span>' + escapeHtml(p.location) + ' &middot; ' + p.category + '</span>' +
+                        '</div></div>';
+                }).join('');
+            });
+        }
+
+        window.removePhoto = function(id) {
+            if (!confirm('Delete this photo?')) return;
+            deletePhoto(id, function() {
+                loadUploadedPhotos();
+                updateStats();
+                showToast('Photo deleted');
+            });
+        };
+
+        // ===== Portfolio Default List =====
         function loadPortfolio() {
             var tbody = document.getElementById('portfolioTable');
             tbody.innerHTML = PORTFOLIO_ITEMS.map(function(item) {
@@ -703,6 +965,7 @@
                     '<td>' + item.loc + '</td>' +
                 '</tr>';
             }).join('');
+            loadUploadedPhotos();
         }
 
         // ===== Hero =====
@@ -821,6 +1084,9 @@
         // ===== Stats =====
         function updateStats() {
             document.getElementById('statReviews').textContent = getUserReviews().length;
+            getAllPhotos(function(photos) {
+                document.getElementById('statPortfolio').textContent = 17 + photos.length;
+            });
         }
 
         // ===== Utils =====
