@@ -426,30 +426,10 @@ h1, h2, h3, h4 {
     border-color: var(--color-primary);
 }
 
-.portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-}
-
 .portfolio-item {
     border-radius: var(--radius-md);
     overflow: hidden;
     cursor: pointer;
-    transition: var(--transition-slow);
-}
-
-.portfolio-item.hidden {
-    display: none;
-}
-
-.portfolio-item.fade-in {
-    animation: portfolioFadeIn 0.5s ease-out both;
-}
-
-@keyframes portfolioFadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
 }
 
 .portfolio-img {
@@ -487,24 +467,6 @@ h1, h2, h3, h4 {
 
 .portfolio-item:hover .portfolio-overlay {
     opacity: 1;
-}
-
-/* Portfolio show more button */
-.portfolio-more-wrap {
-    text-align: center;
-    margin-top: 32px;
-}
-
-.portfolio-grid:not(.expanded) .portfolio-item:nth-child(n+9) {
-    display: none;
-}
-
-.portfolio-grid.expanded + .portfolio-more-wrap {
-    display: none;
-}
-
-.portfolio-more-btn {
-    min-width: 220px;
 }
 
 .portfolio-overlay h3 {
@@ -670,13 +632,10 @@ h1, h2, h3, h4 {
 
 /* ===== Services / Pricing ===== */
 .services {
-    background: var(--color-dark);
-}
-
-.pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
+    background: var(--color-gray-900);
+    overflow: hidden;
+    padding-top: 80px;
+    padding-bottom: 60px;
 }
 
 .pricing-card {
@@ -700,11 +659,6 @@ h1, h2, h3, h4 {
 .pricing-card.featured {
     border-color: var(--color-primary);
     background: linear-gradient(180deg, rgba(200, 164, 92, 0.08) 0%, var(--color-gray-900) 100%);
-    transform: scale(1.05);
-}
-
-.pricing-card.featured:hover {
-    transform: scale(1.05) translateY(-8px);
 }
 
 .pricing-badge {
@@ -783,51 +737,161 @@ h1, h2, h3, h4 {
     width: 100%;
 }
 
-/* ===== Why Us ===== */
-.why-us {
-    background: var(--color-gray-900);
+/* ===== 3D Carousel (shared) ===== */
+.carousel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.why-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 24px;
+.carousel-scene {
+    perspective: 1800px;
+    width: 100%;
+    overflow: hidden;
+    padding: 40px 0;
 }
 
-.why-card {
-    padding: 32px 24px;
-    background: var(--color-gray-800);
-    border: 1px solid var(--color-gray-700);
-    border-radius: var(--radius-lg);
+.carousel-track {
+    width: var(--carousel-card-w, 280px);
+    height: var(--carousel-card-h, 400px);
+    margin: 0 auto;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+.carousel-slide {
+    position: absolute;
+    width: var(--carousel-card-w, 280px);
+    height: var(--carousel-card-h, 400px);
+    top: 0;
+    left: 0;
+    backface-visibility: visible;
+    transition: filter 0.1s linear;
+    cursor: grab;
+}
+
+.carousel-slide:active {
+    cursor: grabbing;
+}
+
+.carousel-slide.carousel-hidden {
+    display: none;
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(10px);
+    color: var(--color-white);
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: var(--transition);
+    opacity: 0.8;
 }
 
-.why-card:hover {
-    border-color: rgba(200, 164, 92, 0.3);
-    transform: translateY(-4px);
+.carousel-btn:hover {
+    background: var(--color-primary);
+    color: var(--color-dark);
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
 }
 
-.why-number {
-    font-family: var(--font-display);
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: rgba(200, 164, 92, 0.15);
-    margin-bottom: 16px;
-    line-height: 1;
+.carousel-btn-prev { left: 0; }
+.carousel-btn-next { right: 0; }
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
 }
 
-.why-card h3 {
-    font-family: var(--font-body);
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 10px;
+.carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-gray-700);
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 0;
 }
 
-.why-card p {
-    font-size: 0.85rem;
-    color: var(--color-gray-400);
-    line-height: 1.6;
+.carousel-dot.active {
+    background: var(--color-primary);
+    transform: scale(1.3);
 }
+
+/* Portfolio slider (horizontal) */
+.portfolio-carousel .carousel-scene {
+    perspective: none;
+    padding: 0;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+}
+
+.portfolio-carousel .carousel-track {
+    display: flex;
+    width: auto;
+    height: auto;
+    position: relative;
+    transform-style: flat;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.portfolio-carousel .carousel-slide {
+    position: relative;
+    width: 25%;
+    height: auto;
+    flex-shrink: 0;
+    padding: 0 6px;
+}
+
+.portfolio-carousel .portfolio-img {
+    aspect-ratio: 3/4;
+}
+
+.portfolio-carousel .carousel-btn {
+    top: 45%;
+}
+
+/* Pricing carousel */
+.pricing-carousel {
+    --carousel-card-w: 270px;
+    --carousel-card-h: 460px;
+    --carousel-radius: 280px;
+}
+
+.pricing-carousel .carousel-scene {
+    perspective: 4000px;
+    overflow: hidden;
+    padding: 30px 0;
+    min-height: calc(var(--carousel-card-h) + 80px);
+}
+
+.pricing-carousel .carousel-slide .pricing-card {
+    width: 100%;
+    height: 100%;
+}
+
+.pricing-carousel .pricing-card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* RTL carousel */
+html[dir="rtl"] .carousel-btn-prev svg { transform: rotate(180deg); }
+html[dir="rtl"] .carousel-btn-next svg { transform: rotate(180deg); }
 
 /* ===== Team ===== */
 .team {
@@ -1408,32 +1472,17 @@ html[dir="rtl"] .lang-option {
     text-align: right;
 }
 
-html[dir="rtl"] .why-card {
-    text-align: right;
-}
 
 /* ===== Responsive ===== */
-@media (max-width: 1200px) {
-    .pricing-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .pricing-card.featured {
-        transform: scale(1);
-    }
-
-    .pricing-card.featured:hover {
-        transform: translateY(-8px);
-    }
-
-    .why-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
 @media (max-width: 1024px) {
-    .portfolio-grid {
-        grid-template-columns: repeat(3, 1fr);
+    .portfolio-carousel .carousel-slide {
+        width: 33.333%;
+    }
+
+    .pricing-carousel {
+        --carousel-card-w: 250px;
+        --carousel-card-h: 440px;
+        --carousel-radius: 260px;
     }
 
     .about-grid {
@@ -1546,19 +1595,9 @@ html[dir="rtl"] .why-card {
         bottom: 24px;
     }
 
-    /* Portfolio */
-    .portfolio-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    .portfolio-img {
-        aspect-ratio: 3/4;
-    }
-
-    /* Show only first 4 items on mobile */
-    .portfolio-grid:not(.expanded) .portfolio-item:nth-child(n+5) {
-        display: none;
+    /* Portfolio slider */
+    .portfolio-carousel .carousel-slide {
+        width: 50%;
     }
 
     /* Show overlay always on touch devices */
@@ -1587,7 +1626,6 @@ html[dir="rtl"] .why-card {
 
     .team-card:hover,
     .review-card:hover,
-    .why-card:hover,
     .pricing-card:hover {
         transform: none;
     }
@@ -1644,10 +1682,11 @@ html[dir="rtl"] .why-card {
         gap: 4px;
     }
 
-    /* Pricing */
-    .pricing-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+    /* Pricing carousel */
+    .pricing-carousel {
+        --carousel-card-w: 240px;
+        --carousel-card-h: 420px;
+        --carousel-radius: 240px;
     }
 
     .pricing-card {
@@ -1676,29 +1715,6 @@ html[dir="rtl"] .why-card {
     .pricing-features svg {
         width: 14px;
         height: 14px;
-    }
-
-    /* Why */
-    .why-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    .why-card {
-        padding: 20px 16px;
-    }
-
-    .why-number {
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-    }
-
-    .why-card h3 {
-        font-size: 0.9rem;
-    }
-
-    .why-card p {
-        font-size: 0.8rem;
     }
 
     /* Team */
@@ -1876,15 +1892,10 @@ html[dir="rtl"] .why-card {
         font-size: 0.65rem;
     }
 
-    /* Portfolio: keep 2 columns on small screens too */
-    .portfolio-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .portfolio-img {
-        aspect-ratio: 3/4;
-        border-radius: var(--radius-sm);
+    /* Portfolio slider mobile */
+    .portfolio-carousel .carousel-slide {
+        width: 50%;
+        padding: 0 4px;
     }
 
     .portfolio-item {
@@ -1923,10 +1934,11 @@ html[dir="rtl"] .why-card {
         font-size: 0.72rem;
     }
 
-    /* Pricing: single column */
-    .pricing-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
+    /* Pricing carousel mobile */
+    .pricing-carousel {
+        --carousel-card-w: 230px;
+        --carousel-card-h: 400px;
+        --carousel-radius: 220px;
     }
 
     .pricing-card {
@@ -1939,12 +1951,6 @@ html[dir="rtl"] .why-card {
 
     .pricing-features li {
         font-size: 0.82rem;
-    }
-
-    /* Why */
-    .why-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
     }
 
     /* Team: keep 2 columns */
